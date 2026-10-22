@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'database.dart';
+import 'diet_screen.dart';
+import 'finances_screen.dart';
+import 'recommendations_screen.dart';
 import 'sleep_screen.dart';
 import 'workouts_screen.dart';
 
@@ -34,13 +37,16 @@ class _Section {
   final Widget Function()? screen; // null = not built yet
 }
 
+Widget _recommendations() => const RecommendationsScreen();
+
 const _sections = [
-  _Section('Diet', 'Meals by text or photo', Icons.restaurant, 'meals'),
+  _Section('Diet', 'Meals by text or photo', Icons.restaurant, 'meals', dietScreen),
   _Section('Workouts', 'Running, gym, tennis', Icons.fitness_center, 'workouts',
       workoutsScreen),
   _Section('Sleep', 'Hours slept each night', Icons.bedtime, 'sleep', sleepScreen),
-  _Section('Finances', 'Savings and investments', Icons.savings, 'balances'),
-  _Section('Recommendations', 'Suggestions for you', Icons.lightbulb, null),
+  _Section('Finances', 'Savings and investments', Icons.savings, 'balances', financesScreen),
+  _Section('Recommendations', 'Suggestions for you', Icons.lightbulb, null,
+      _recommendations),
 ];
 
 class HomeScreen extends StatefulWidget {
