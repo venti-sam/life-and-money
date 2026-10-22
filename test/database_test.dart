@@ -1,28 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:life_and_money/database.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  late AppDatabase appDb;
+  final db = AppDatabase.instance;
 
-  setUp(() {
-    appDb = AppDatabase.forPath(inMemoryDatabasePath);
-  });
-
-  test('creates all four tables, all empty', () async {
+  test('tables start empty', () async {
     for (final table in ['meals', 'workouts', 'sleep', 'balances']) {
-      expect(await appDb.count(table), 0, reason: table);
+      expect(await db.count(table), 0, reason: table);
     }
   });
 
-  test('count reflects inserted rows', () async {
-    final db = await appDb.db;
+  test('inserted records are stored and counted per table', () async {
     await db.insert('sleep', {'night': '2026-10-21', 'hours': 7.5});
     await db.insert('sleep', {'night': '2026-10-22', 'hours': 6.0});
-    expect(await appDb.count('sleep'), 2);
-    expect(await appDb.count('meals'), 0);
+    expect(await db.count('sleep'), 2);
+    expect(await db.count('meals'), 0);
+    final rows = await db.all('sleep');
+    expect(rows.first['hours'], 7.5);
   });
 }

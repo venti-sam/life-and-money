@@ -5,10 +5,11 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   check:
-    name: Check and build
+    name: Check, test and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,19 +21,40 @@ jobs:
         with:
           channel: stable
           cache: true
-      # The android/ folder is generated here so the repo stays small.
+      # The android/ and web/ folders are generated here so the repo stays small.
       # Flutter also adds a sample test that doesn't fit this app; remove it.
       - run: |
-          flutter create --platforms=android --project-name life_and_money --org com.samuel .
+          flutter create --platforms=android,web --project-name life_and_money --org com.samuel .
           rm -f test/widget_test.dart
+          sed -i 's/"name": *"[^"]*"/"name": "Life \& Money"/; s/"short_name": *"[^"]*"/"short_name": "Life\&Money"/' web/manifest.json
+          sed -i 's#<title>[^<]*</title>#<title>Life \& Money</title>#' web/index.html
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      - run: flutter build web --release --base-href /life-and-money/
       - run: flutter build apk --debug
       - uses: actions/upload-artifact@v4
         with:
           name: life-and-money-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy-web:
+    name: Publish website
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
 
   release:
     name: Publish release APK

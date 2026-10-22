@@ -1,65 +1,32 @@
-import 'package:path/path.dart' as p;
-import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
 
-/// On-device storage. Everything lives in one SQLite file on the phone;
-/// nothing is sent anywhere.
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// On-device storage that works on both the web (browser storage) and
+/// Android. Data never leaves the device.
 ///
-/// Tables are created now so later steps (logging screens) can just use them.
+/// Each "table" is a list of records (maps). Known tables, used by later
+/// logging screens: meals, workouts, sleep, balances.
 class AppDatabase {
-  AppDatabase._() : _pathOverride = null;
+  AppDatabase._();
   static final AppDatabase instance = AppDatabase._();
 
-  /// A separate database at [path] (e.g. `inMemoryDatabasePath`), for tests.
-  AppDatabase.forPath(String path) : _pathOverride = path;
+  static const _prefix = 'table_';
 
-  final String? _pathOverride;
-
-  Database? _db;
-
-  Future<Database> get db async => _db ??= await _open();
-
-  Future<Database> _open() async {
-    final path =
-        _pathOverride ?? p.join(await getDatabasesPath(), 'life_and_money.db');
-    return openDatabase(path, version: 1, onCreate: _create);
+  Future<List<Map<String, Object?>>> all(String table) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('$_prefix$table');
+    if (raw == null) return [];
+    return (jsonDecode(raw) as List).cast<Map<String, Object?>>();
   }
 
-  Future<void> _create(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE meals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        logged_at TEXT NOT NULL,
-        description TEXT,
-        photo_path TEXT,
-        calories INTEGER
-      )''');
-    await db.execute('''
-      CREATE TABLE workouts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        logged_at TEXT NOT NULL,
-        type TEXT NOT NULL,
-        duration_minutes INTEGER,
-        notes TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE sleep (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        night TEXT NOT NULL,
-        hours REAL NOT NULL
-      )''');
-    await db.execute('''
-      CREATE TABLE balances (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        recorded_at TEXT NOT NULL,
-        account TEXT NOT NULL,
-        kind TEXT NOT NULL,
-        amount REAL NOT NULL
-      )''');
+  Future<void> insert(String table, Map<String, Object?> record) async {
+    final rows = await all(table);
+    rows.add(record);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('$_prefix$table', jsonEncode(rows));
   }
 
-  /// Number of rows in a table, used by the home screen to show it works.
-  Future<int> count(String table) async {
-    final rows = await (await db).rawQuery('SELECT COUNT(*) AS c FROM $table');
-    return Sqflite.firstIntValue(rows) ?? 0;
-  }
+  /// Number of records in a table, used by the home screen.
+  Future<int> count(String table) async => (await all(table)).length;
 }
