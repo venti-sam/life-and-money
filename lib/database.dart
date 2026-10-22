@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// Tables are created now so later steps (logging screens) can just use them.
 class AppDatabase {
-  AppDatabase._([this._pathOverride]);
+  AppDatabase._() : _pathOverride = null;
   static final AppDatabase instance = AppDatabase._();
 
   /// A separate database at [path] (e.g. `inMemoryDatabasePath`), for tests.
