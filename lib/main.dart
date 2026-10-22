@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'database.dart';
+import 'sleep_screen.dart';
+import 'workouts_screen.dart';
 
 void main() {
   runApp(const LifeAndMoneyApp());
@@ -23,27 +25,37 @@ class LifeAndMoneyApp extends StatelessWidget {
 }
 
 class _Section {
-  const _Section(this.title, this.subtitle, this.icon, this.table);
+  const _Section(this.title, this.subtitle, this.icon, this.table,
+      [this.screen]);
   final String title;
   final String subtitle;
   final IconData icon;
   final String? table; // table used to show an entry count, if any
+  final Widget Function()? screen; // null = not built yet
 }
 
 const _sections = [
   _Section('Diet', 'Meals by text or photo', Icons.restaurant, 'meals'),
-  _Section('Workouts', 'Running, gym, tennis', Icons.fitness_center, 'workouts'),
-  _Section('Sleep', 'Hours slept each night', Icons.bedtime, 'sleep'),
+  _Section('Workouts', 'Running, gym, tennis', Icons.fitness_center, 'workouts',
+      workoutsScreen),
+  _Section('Sleep', 'Hours slept each night', Icons.bedtime, 'sleep', sleepScreen),
   _Section('Finances', 'Savings and investments', Icons.savings, 'balances'),
   _Section('Recommendations', 'Suggestions for you', Icons.lightbulb, null),
 ];
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.countFor});
 
   /// Returns the entry count for a table. Defaults to the real database;
   /// tests pass their own.
   final Future<int> Function(String table)? countFor;
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _refresh = 0; // bumped to reload the entry counts after returning
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +64,13 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          for (final s in _sections) _SectionCard(section: s, countFor: countFor),
+          for (final s in _sections)
+            _SectionCard(
+              key: ValueKey('${s.title}$_refresh'),
+              section: s,
+              countFor: widget.countFor,
+              onReturn: () => setState(() => _refresh++),
+            ),
         ],
       ),
     );
@@ -60,8 +78,14 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.section, this.countFor});
+  const _SectionCard({
+    super.key,
+    required this.section,
+    this.countFor,
+    required this.onReturn,
+  });
   final _Section section;
+  final VoidCallback onReturn;
   final Future<int> Function(String table)? countFor;
 
   @override
@@ -78,7 +102,15 @@ class _SectionCard extends StatelessWidget {
                 builder: (context, snap) =>
                     Text(snap.hasData ? '${snap.data} entries' : ''),
               ),
-        onTap: () {
+        onTap: () async {
+          final screen = section.screen;
+          if (screen != null) {
+            await Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (_) => screen()));
+            onReturn();
+            return;
+          }
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('${section.title}: coming soon')),
           );

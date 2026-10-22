@@ -35,6 +35,9 @@ jobs:
     name: Publish website
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: check
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       pages: write
