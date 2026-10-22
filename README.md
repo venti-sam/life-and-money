@@ -4,8 +4,10 @@ A web app (installable on your phone) to track diet, workouts, sleep and
 finances in one place, with recommendations. Data is stored in your browser on
 your device.
 
-**Status:** foundation only. The home screen shows five sections (Diet,
-Workouts, Sleep, Finances, Recommendations). Logging screens come next.
+**What it does now:** log meals (text, calories, photo), workouts, sleep and
+account balances, delete any entry, and see simple tips based on your logs.
+Claude-powered recommendations and importing from Garmin and bank files come
+later.
 
 ## Open it on your phone
 

@@ -14,9 +14,11 @@ Widget workoutsScreen() => LogScreen(
       ),
       describe: (row) {
         final notes = row['notes'] as String? ?? '';
-        return (
+        return LogRow(
           title: '${row['type']}, ${row['duration_minutes']} min',
-          subtitle: notes.isEmpty ? '${row['logged_at']}' : '${row['logged_at']} · $notes',
+          subtitle: notes.isEmpty
+              ? '${row['logged_at']}'
+              : '${row['logged_at']} · $notes',
         );
       },
     );

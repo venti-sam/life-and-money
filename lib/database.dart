@@ -23,6 +23,18 @@ class AppDatabase {
   Future<void> insert(String table, Map<String, Object?> record) async {
     final rows = await all(table);
     rows.add(record);
+    await _save(table, rows);
+  }
+
+  /// Removes the record at [index] (position in insertion order).
+  Future<void> deleteAt(String table, int index) async {
+    final rows = await all(table);
+    if (index < 0 || index >= rows.length) return;
+    rows.removeAt(index);
+    await _save(table, rows);
+  }
+
+  Future<void> _save(String table, List<Map<String, Object?>> rows) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_prefix$table', jsonEncode(rows));
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:life_and_money/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   Widget app() => MaterialApp(
@@ -27,11 +28,12 @@ void main() {
     expect(find.text('3 entries'), findsOneWidget);
   });
 
-  testWidgets('tapping a section shows coming soon', (tester) async {
+  testWidgets('tapping a section opens its screen', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Diet'));
-    await tester.pump();
-    expect(find.text('Diet: coming soon'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Log meal'), findsOneWidget);
   });
 }

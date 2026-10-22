@@ -10,28 +10,53 @@ Widget sleepScreen() => LogScreen(
       table: 'sleep',
       addLabel: 'Log sleep',
       formBuilder: _sleepForm,
-      describe: (row) => (
-        title: '${row['hours']} hours',
-        subtitle: 'Night of ${row['night']}',
-      ),
+      describe: (row) {
+        final notes = row['notes'] as String? ?? '';
+        return LogRow(
+          title: '${row['hours']} hours',
+          subtitle: notes.isEmpty
+              ? 'Night of ${row['night']}'
+              : 'Night of ${row['night']} · $notes',
+        );
+      },
     );
 
 Future<Map<String, Object?>?> _sleepForm(BuildContext context) {
-  final controller = TextEditingController();
+  final hoursController = TextEditingController();
+  final notesController = TextEditingController();
   return showDialog<Map<String, Object?>>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Hours slept'),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        // Up to 2 digits before and 2 after the decimal point (7.25).
-        inputFormatters: [
-          TextInputFormatter.withFunction((old, value) =>
-              _hoursPattern.hasMatch(value.text) ? value : old),
+      title: const Text('Log sleep'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: hoursController,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            // Up to 2 digits before and 2 after the decimal point (7.25).
+            inputFormatters: [
+              TextInputFormatter.withFunction((old, value) =>
+                  _hoursPattern.hasMatch(value.text) ? value : old),
+            ],
+            decoration: const InputDecoration(
+              labelText: 'Hours slept',
+              hintText: 'e.g. 7.25',
+            ),
+          ),
+          TextField(
+            controller: notesController,
+            minLines: 2,
+            maxLines: 5,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Notes (optional)',
+              hintText: 'e.g. woke up twice, felt rested',
+              alignLabelWithHint: true,
+            ),
+          ),
         ],
-        decoration: const InputDecoration(hintText: 'e.g. 7.25'),
       ),
       actions: [
         TextButton(
@@ -40,10 +65,14 @@ Future<Map<String, Object?>?> _sleepForm(BuildContext context) {
         ),
         FilledButton(
           onPressed: () {
-            final hours =
-                double.tryParse(controller.text.trim().replaceAll(',', '.'));
+            final hours = double.tryParse(
+                hoursController.text.trim().replaceAll(',', '.'));
             if (hours == null || hours <= 0 || hours > 24) return;
-            Navigator.pop(context, {'night': today(), 'hours': double.parse(hours.toStringAsFixed(2))});
+            Navigator.pop(context, {
+              'night': today(),
+              'hours': double.parse(hours.toStringAsFixed(2)),
+              'notes': notesController.text.trim(),
+            });
           },
           child: const Text('Save'),
         ),
