@@ -39,7 +39,9 @@ class _LogScreenState extends State<LogScreen> {
     if (record == null) return;
     await AppDatabase.instance.insert(widget.table, record);
     if (!mounted) return;
-    setState(() => _rows = _load());
+    setState(() {
+      _rows = _load();
+    });
   }
 
   @override
