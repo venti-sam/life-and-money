@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'log_screen.dart';
+import 'statement_import.dart';
 
 const accountKinds = ['Savings', 'Investment'];
 
@@ -12,8 +13,14 @@ double _amount(Map<String, Object?> row) => (row['amount'] as num).toDouble();
 /// Total per kind (Savings / Investment), counting only the latest entry for
 /// each account name. Rows are in the order they were logged.
 Map<String, double> latestTotals(List<Map<String, Object?>> rows) {
+  // Oldest first, so the newest balance for each account wins.
+  final ordered = [...rows.indexed]..sort((a, b) {
+      final byDate = ((a.$2['recorded_at'] as String?) ?? '')
+          .compareTo((b.$2['recorded_at'] as String?) ?? '');
+      return byDate != 0 ? byDate : a.$1.compareTo(b.$1);
+    });
   final latest = <String, Map<String, Object?>>{};
-  for (final row in rows) {
+  for (final (_, row) in ordered) {
     final name = (row['account'] as String? ?? '').toLowerCase();
     latest['${row['kind']}|$name'] = row;
   }
@@ -29,6 +36,15 @@ Widget financesScreen() => LogScreen(
       title: 'Finances',
       table: 'balances',
       addLabel: 'Log balance',
+      actions: (context, reload) => [
+        IconButton(
+          icon: const Icon(Icons.upload_file),
+          tooltip: 'Import statement',
+          onPressed: () async {
+            if (await importStatement(context)) reload();
+          },
+        ),
+      ],
       formBuilder: (context) => showDialog<Map<String, Object?>>(
         context: context,
         builder: (context) => const _BalanceDialog(),

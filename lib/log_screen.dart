@@ -25,6 +25,7 @@ class LogScreen extends StatefulWidget {
     required this.formBuilder,
     required this.describe,
     this.header,
+    this.actions,
   });
 
   final String title;
@@ -34,6 +35,10 @@ class LogScreen extends StatefulWidget {
       formBuilder;
   final LogRow Function(Map<String, Object?> row) describe;
   final Widget Function(List<Map<String, Object?>> rows)? header;
+
+  /// Extra buttons in the app bar. [reload] refreshes the list.
+  final List<Widget> Function(BuildContext context, VoidCallback reload)?
+      actions;
 
   @override
   State<LogScreen> createState() => _LogScreenState();
@@ -85,7 +90,10 @@ class _LogScreenState extends State<LogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: widget.actions?.call(context, _reload),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _add,
         icon: const Icon(Icons.add),

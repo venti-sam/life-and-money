@@ -15,4 +15,12 @@ void main() {
   test('no entries gives zero totals', () {
     expect(latestTotals([]), {'Savings': 0.0, 'Investment': 0.0});
   });
+
+  test('a newer statement date wins even if it was logged earlier', () {
+    final totals = latestTotals([
+      {'account': 'POSB', 'kind': 'Savings', 'amount': 1200.0, 'recorded_at': '2026-09-30'},
+      {'account': 'POSB', 'kind': 'Savings', 'amount': 900.0, 'recorded_at': '2026-08-31'},
+    ]);
+    expect(totals['Savings'], 1200.0);
+  });
 }

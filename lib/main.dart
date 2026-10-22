@@ -5,6 +5,7 @@ import 'diet_screen.dart';
 import 'finances_screen.dart';
 import 'recommendations_screen.dart';
 import 'sleep_screen.dart';
+import 'spending_screen.dart';
 import 'workouts_screen.dart';
 
 void main() {
@@ -37,6 +38,8 @@ class _Section {
   final Widget Function()? screen; // null = not built yet
 }
 
+Widget _spending() => const SpendingScreen();
+
 Widget _recommendations() => const RecommendationsScreen();
 
 const _sections = [
@@ -45,6 +48,8 @@ const _sections = [
       workoutsScreen),
   _Section('Sleep', 'Hours slept each night', Icons.bedtime, 'sleep', sleepScreen),
   _Section('Finances', 'Savings and investments', Icons.savings, 'balances', financesScreen),
+  _Section('Spending', 'Where your money goes', Icons.pie_chart, 'transactions',
+      _spending),
   _Section('Recommendations', 'Suggestions for you', Icons.lightbulb, null,
       _recommendations),
 ];
