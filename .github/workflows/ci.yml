@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  check:
+    name: Check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      # The android/ folder is generated here so the repo stays small.
+      # Flutter also adds a sample test that doesn't fit this app; remove it.
+      - run: |
+          flutter create --platforms=android --project-name life_and_money --org com.samuel .
+          rm -f test/widget_test.dart
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: life-and-money-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+  release:
+    name: Publish release APK
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter create --platforms=android --project-name life_and_money --org com.samuel .
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - run: cp build/app/outputs/flutter-apk/app-release.apk life-and-money.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: life-and-money.apk
+          generate_release_notes: true
