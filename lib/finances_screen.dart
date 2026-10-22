@@ -45,7 +45,8 @@ Widget financesScreen() => LogScreen(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Total: ${(savings + investments).toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleLarge),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
                 Text('Savings: ${savings.toStringAsFixed(2)}'),
                 Text('Investments: ${investments.toStringAsFixed(2)}'),
                 const Text(
