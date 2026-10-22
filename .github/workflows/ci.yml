@@ -1,0 +1,47 @@
+name: Build and deploy website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      # The web/ folder is generated here so the repo stays small.
+      # Flutter also adds a sample test that doesn't fit this app; remove it.
+      - run: |
+          flutter create --platforms=web --project-name life_and_money --org com.samuel .
+          rm -f test/widget_test.dart
+          sed -i 's/"name": *"[^"]*"/"name": "Life \& Money"/; s/"short_name": *"[^"]*"/"short_name": "Life\&Money"/' web/manifest.json
+          sed -i 's#<title>[^<]*</title>#<title>Life \& Money</title>#' web/index.html
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web --release --base-href /life-and-money/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    name: Publish website
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

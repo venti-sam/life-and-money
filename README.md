@@ -1,44 +1,38 @@
 # Life & Money
 
-An Android app to track diet, workouts, sleep and finances in one place, with
-recommendations. Everything is stored on your phone.
+A web app (installable on your phone) to track diet, workouts, sleep and
+finances in one place, with recommendations. Data is stored in your browser on
+your device.
 
 **Status:** foundation only. The home screen shows five sections (Diet,
-Workouts, Sleep, Finances, Recommendations) and the on-phone database is set
-up. Logging screens come next.
+Workouts, Sleep, Finances, Recommendations). Logging screens come next.
 
-## Install on your phone (no coding needed)
+## Open it on your phone
 
-GitHub builds the app for you.
+1. In Chrome on your phone, go to https://venti-sam.github.io/life-and-money/
+2. Tap the menu (three dots) and choose **Add to Home screen** / **Install app**.
 
-1. On your computer, open this repo on GitHub and click the **Actions** tab.
-2. Click the latest **Build Android APK** run (green tick = success).
-3. Scroll to **Artifacts** and download **life-and-money-apk** (a zip).
-4. Unzip it to get `app-release.apk` and send it to your phone (Google Drive,
-   email, USB cable, etc.).
-5. On your vivo X300, open the file. If asked, allow "Install unknown apps"
-   for the app you opened it from (Files, Drive, Chrome...). Tap **Install**.
+Use the same icon each time and don't clear the site's data, or your entries
+are lost.
 
-If no run exists yet, click **Build Android APK** in the left list, then
-**Run workflow**. It takes about 5-10 minutes.
+## How updates work
+
+Every change goes through a pull request. GitHub automatically checks the code,
+runs the tests and builds the website. When a change is merged into `main`, the
+website above updates by itself. A red cross on a pull request means something
+is broken.
 
 ## Run it yourself (optional, for developers)
 
-1. Install [Flutter](https://docs.flutter.dev/get-started/install) and Android
-   Studio.
-2. Enable Developer options and USB debugging on the phone, plug it in.
-3. From this folder:
-   ```
-   flutter create --platforms=android --project-name life_and_money --org com.samuel .
-   flutter pub get
-   flutter run
-   ```
-   (`flutter create .` generates the `android/` folder, which is not stored in
-   the repo. It keeps the existing `lib/` code.)
+```
+flutter create --platforms=web --project-name life_and_money --org com.samuel .
+flutter pub get
+flutter run -d chrome
+```
 
 ## Project layout
 
 - `lib/main.dart`: home screen with the five sections.
-- `lib/database.dart`: on-phone SQLite database (meals, workouts, sleep,
-  balances tables).
-- `.github/workflows/build-apk.yml`: builds the installable APK.
+- `lib/database.dart`: on-device storage.
+- `test/`: automatic tests.
+- `.github/workflows/ci.yml`: checks, tests, builds and deploys the website.
