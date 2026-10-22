@@ -5,10 +5,9 @@ import 'package:life_and_money/diet_screen.dart';
 import 'package:life_and_money/finances_screen.dart';
 import 'package:life_and_money/sleep_screen.dart';
 import 'package:life_and_money/workouts_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(AppDatabase.instance.resetForTesting);
 
   testWidgets('logging sleep saves an entry and lists it', (tester) async {
     await tester.pumpWidget(MaterialApp(home: sleepScreen()));

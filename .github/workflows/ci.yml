@@ -16,13 +16,6 @@ jobs:
         with:
           channel: stable
           cache: true
-      # The web/ folder is generated here so the repo stays small.
-      # Flutter also adds a sample test that doesn't fit this app; remove it.
-      - run: |
-          flutter create --platforms=web --project-name life_and_money --org com.samuel .
-          rm -f test/widget_test.dart
-          sed -i 's/"name": *"[^"]*"/"name": "Life \& Money"/; s/"short_name": *"[^"]*"/"short_name": "Life\&Money"/' web/manifest.json
-          sed -i 's#<title>[^<]*</title>#<title>Life \& Money</title>#' web/index.html
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
