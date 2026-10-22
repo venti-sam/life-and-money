@@ -51,11 +51,19 @@ class _WorkoutDialogState extends State<_WorkoutDialog> {
           TextField(
             controller: _minutes,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Minutes'),
+            decoration: const InputDecoration(labelText: 'Time (minutes)'),
           ),
           TextField(
             controller: _notes,
-            decoration: const InputDecoration(labelText: 'Notes (optional)'),
+            minLines: 3,
+            maxLines: 6,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Notes (optional)',
+              hintText: 'What you did and how hard it felt, e.g. '
+                  '5k easy run, effort 6/10, legs heavy',
+              alignLabelWithHint: true,
+            ),
           ),
         ],
       ),

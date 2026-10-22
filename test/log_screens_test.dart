@@ -23,6 +23,21 @@ void main() {
     expect(await AppDatabase.instance.count('sleep'), 1);
   });
 
+  testWidgets('sleep keeps up to 2 decimals and ignores extra digits',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(home: sleepScreen()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Log sleep'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '7.25');
+    await tester.enterText(find.byType(TextField), '7.256'); // rejected
+    await tester.pump();
+    expect(find.text('7.25'), findsOneWidget);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('7.25 hours'), findsOneWidget);
+  });
+
   testWidgets('sleep rejects invalid hours', (tester) async {
     await tester.pumpWidget(MaterialApp(home: sleepScreen()));
     await tester.pumpAndSettle();
@@ -40,11 +55,14 @@ void main() {
 
     await tester.tap(find.text('Log workout'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '45');
+    await tester.enterText(find.widgetWithText(TextField, 'Time (minutes)'), '45');
+    await tester.enterText(
+        find.widgetWithText(TextField, 'Notes (optional)'), 'Easy 5k, effort 6/10');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     expect(find.text('Running, 45 min'), findsOneWidget);
+    expect(find.textContaining('effort 6/10'), findsOneWidget);
     expect(await AppDatabase.instance.count('workouts'), 1);
   });
 }
