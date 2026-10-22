@@ -9,18 +9,23 @@ up. Logging screens come next.
 
 ## Install on your phone (no coding needed)
 
-GitHub builds the app for you.
+GitHub builds the app for you and publishes it as a download.
 
-1. On your computer, open this repo on GitHub and click the **Actions** tab.
-2. Click the latest **Build Android APK** run (green tick = success).
-3. Scroll to **Artifacts** and download **life-and-money-apk** (a zip).
-4. Unzip it to get `app-release.apk` and send it to your phone (Google Drive,
-   email, USB cable, etc.).
-5. On your vivo X300, open the file. If asked, allow "Install unknown apps"
-   for the app you opened it from (Files, Drive, Chrome...). Tap **Install**.
+1. On your phone, open the repo's **Releases** page:
+   https://github.com/venti-sam/life-and-money/releases
+2. Under the newest release, tap **life-and-money.apk** to download it.
+3. Open the downloaded file. If asked, allow "Install unknown apps" for the
+   app you opened it from (Chrome, Files...). Tap **Install**.
 
-If no run exists yet, click **Build Android APK** in the left list, then
-**Run workflow**. It takes about 5-10 minutes.
+## How the automatic checks work
+
+Every time code is pushed or a pull request is opened, GitHub automatically:
+checks the code for mistakes, runs the tests, and builds a test version of
+the app. A red cross on a pull request means something is broken, so it
+should not be merged. A green tick means it passed.
+
+To publish a new version for your phone, add a version tag such as `v0.1.0`.
+GitHub then builds the app and attaches it to a Release.
 
 ## Run it yourself (optional, for developers)
 
@@ -41,4 +46,5 @@ If no run exists yet, click **Build Android APK** in the left list, then
 - `lib/main.dart`: home screen with the five sections.
 - `lib/database.dart`: on-phone SQLite database (meals, workouts, sleep,
   balances tables).
-- `.github/workflows/build-apk.yml`: builds the installable APK.
+- `test/`: automatic tests for the database and home screen.
+- `.github/workflows/ci.yml`: checks, tests, builds, and publishes releases.

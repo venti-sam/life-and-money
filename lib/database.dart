@@ -6,15 +6,21 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// Tables are created now so later steps (logging screens) can just use them.
 class AppDatabase {
-  AppDatabase._();
+  AppDatabase._([this._pathOverride]);
   static final AppDatabase instance = AppDatabase._();
+
+  /// A separate database at [path] (e.g. `inMemoryDatabasePath`), for tests.
+  AppDatabase.forPath(String path) : _pathOverride = path;
+
+  final String? _pathOverride;
 
   Database? _db;
 
   Future<Database> get db async => _db ??= await _open();
 
   Future<Database> _open() async {
-    final path = p.join(await getDatabasesPath(), 'life_and_money.db');
+    final path =
+        _pathOverride ?? p.join(await getDatabasesPath(), 'life_and_money.db');
     return openDatabase(path, version: 1, onCreate: _create);
   }
 

@@ -39,7 +39,11 @@ const _sections = [
 ];
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.countFor});
+
+  /// Returns the entry count for a table. Defaults to the real database;
+  /// tests pass their own.
+  final Future<int> Function(String table)? countFor;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +52,7 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          for (final s in _sections) _SectionCard(section: s),
+          for (final s in _sections) _SectionCard(section: s, countFor: countFor),
         ],
       ),
     );
@@ -56,8 +60,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.section});
+  const _SectionCard({required this.section, this.countFor});
   final _Section section;
+  final Future<int> Function(String table)? countFor;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +74,7 @@ class _SectionCard extends StatelessWidget {
         trailing: section.table == null
             ? null
             : FutureBuilder<int>(
-                future: AppDatabase.instance.count(section.table!),
+                future: (countFor ?? AppDatabase.instance.count)(section.table!),
                 builder: (context, snap) =>
                     Text(snap.hasData ? '${snap.data} entries' : ''),
               ),
